@@ -80,3 +80,110 @@ docker-compose up --build
 - Angular Material / Tailwind CSS
 - RxJS
 
+## Creating a New Service
+
+### 1. Generate Project with Spring Initializr
+
+Add Dependencies:
+- Spring Web
+- Eureka Discovery Client
+- Spring Security
+- Spring Data JPA
+- PostgreSQL Driver
+
+### 2. Configure Application
+
+Update `src/main/resources/application.yml`:
+
+```yaml
+spring:
+  application:
+    name: <service-name>-service
+  datasource:
+    url: jdbc:postgresql://localhost:5432/<service_name_db>
+    username: postgres
+    password: postgres
+  jpa:
+    hibernate:
+      ddl-auto: update
+
+server:
+  port: <port>
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://localhost:8761/eureka/
+```
+
+### 3. Enable Discovery Client
+
+Add `@EnableDiscoveryClient` to your main application class:
+
+```java
+package com.springSuite.<service>;
+
+import org.springframework.boot.SpringApplication;
+import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
+
+@SpringBootApplication
+@EnableDiscoveryClient
+public class ServiceNameApplication {
+    public static void main(String[] args) {
+        SpringApplication.run(ServiceNameApplication.class, args);
+    }
+}
+```
+
+### 4. Update Docker Compose
+
+Add your service to the root `docker-compose.yml`:
+
+```yaml
+<service-name>-service:
+  build: ./<service-name>-service
+  container_name: <service-name>-service
+  ports:
+    - "<port>:<port>"
+  environment:
+    - SPRING_DATASOURCE_URL=jdbc:postgresql://postgres:5432/<service_name_db>
+    - EUREKA_CLIENT_SERVICEURL_DEFAULTZONE=http://service-registry:8761/eureka/
+  depends_on:
+    - postgres
+    - service-registry
+```
+
+### 5. Register with API Gateway
+
+Add routing configuration in `api-gateway/src/main/resources/application.yml`:
+
+```yaml
+spring:
+  cloud:
+    gateway:
+      routes:
+        - id: <service-name>-service
+          uri: lb://<service-name>-service
+          predicates:
+            - Path=/api/<service>/**
+```
+
+### 6. Service Port Reference
+
+| Service | Port |
+|---------|------|
+| auth-service | 8081 |
+| calendar-service | 8083 |
+| <your-service> | 808x |
+
+
+### 7. Run Your Service
+
+```bash
+cd <service-name>-service
+./gradlew bootRun
+```
+
+Verify it's registered in Eureka at http://localhost:8761
+
