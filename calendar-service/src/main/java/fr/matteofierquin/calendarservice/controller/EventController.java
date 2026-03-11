@@ -1,0 +1,72 @@
+package fr.matteofierquin.calendarservice.controller;
+
+import fr.matteofierquin.calendarservice.dto.EventRequest;
+import fr.matteofierquin.calendarservice.dto.EventResponse;
+import fr.matteofierquin.calendarservice.service.EventService;
+import jakarta.validation.Valid;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.time.LocalDateTime;
+import java.util.List;
+
+@RestController
+@RequestMapping("/api/calendar/events")
+@RequiredArgsConstructor
+@CrossOrigin(origins = "*")
+public class EventController {
+
+    private final EventService eventService;
+
+    @GetMapping
+    public ResponseEntity<List<EventResponse>> getUserEvents(
+            @RequestHeader("X-User-Name") String username) {
+        List<EventResponse> events = eventService.getUserEvents(username);
+        return ResponseEntity.ok(events);
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<EventResponse> getEvent(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Name") String username) {
+        EventResponse event = eventService.getEventById(id, username);
+        return ResponseEntity.ok(event);
+    }
+
+    @PostMapping
+    public ResponseEntity<EventResponse> createEvent(
+            @Valid @RequestBody EventRequest request,
+            @RequestHeader("X-User-Name") String username) {
+        EventResponse created = eventService.createEvent(request, username);
+        return ResponseEntity.status(HttpStatus.CREATED).body(created);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<EventResponse> updateEvent(
+            @PathVariable Long id,
+            @Valid @RequestBody EventRequest request,
+            @RequestHeader("X-User-Name") String username) {
+        EventResponse updated = eventService.updateEvent(id, request, username);
+        return ResponseEntity.ok(updated);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteEvent(
+            @PathVariable Long id,
+            @RequestHeader("X-User-Name") String username) {
+        eventService.deleteEvent(id, username);
+        return ResponseEntity.noContent().build();
+    }
+
+    // GET /api/calendar/events/range?start=2026-03-01T00:00:00&end=2026-03-31T23:59:59
+    @GetMapping("/range")
+    public ResponseEntity<List<EventResponse>> getEventsByDateRange(
+            @RequestParam LocalDateTime start,
+            @RequestParam LocalDateTime end,
+            @RequestHeader("X-User-Name") String username) {
+        List<EventResponse> events = eventService.getEventsByDateRange(username, start, end);
+        return ResponseEntity.ok(events);
+    }
+}

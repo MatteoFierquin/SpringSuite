@@ -1,0 +1,20 @@
+version: '3.8'
+
+services:
+  api-gateway:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: api-gateway
+    environment:
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka
+    ports:
+      - "8080:8080"
+    depends_on:
+      - service-registry
+    networks:
+      - springsuite-network
+
+networks:
+  springsuite-network:
+    driver: bridge

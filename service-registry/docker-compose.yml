@@ -1,0 +1,14 @@
+services:
+  service-registry:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: service-registry
+    ports:
+      - "8761:8761"
+    networks:
+      - springsuite-network
+
+networks:
+  springsuite-network:
+    driver: bridge

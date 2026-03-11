@@ -1,0 +1,32 @@
+services:
+  calendar-db:
+    image: postgres:16-alpine
+    container_name: calendar-db
+    environment:
+      POSTGRES_DB: calendardb
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5433:5432"
+    volumes:
+      - calendar_data:/var/lib/postgresql/data
+
+  calendar-service:
+    build: .
+    container_name: calendar-service
+    ports:
+      - "8083:8083"
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:postgresql://calendar-db:5432/calendardb
+      EUREKA_CLIENT_SERVICEURL_DEFAULTZONE: http://service-registry:8761/eureka
+    depends_on:
+      - calendar-db
+    networks:
+      - spring-suite
+
+volumes:
+  calendar_data:
+
+networks:
+  spring-suite:
+    external: true
