@@ -1,23 +1,31 @@
-import { Component, inject } from '@angular/core';
+import { Component, inject, signal } from '@angular/core';
 import { CommonModule } from '@angular/common';
+import { FormsModule } from '@angular/forms';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatDialogModule, MatDialog } from '@angular/material/dialog';
+import { MatButtonToggleModule } from '@angular/material/button-toggle';
 import { CalendarStore } from '../../../../core/stores/calendar.store';
 import { EventCardComponent } from '../../components/event-card/event-card.component';
 import { EventDialogComponent } from '../../components/event-dialog/event-dialog.component';
+import { CalendarGridComponent } from '../calendar-grid/calendar-grid.component';
+
+type CalendarView = 'list' | 'grid';
 
 @Component({
   selector: 'app-calendar-list',
   standalone: true,
   imports: [
     CommonModule,
+    FormsModule,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatDialogModule,
+    MatButtonToggleModule,
     EventCardComponent,
+    CalendarGridComponent,
   ],
   template: `
     <div class="mb-6 flex justify-between items-center">
@@ -28,38 +36,58 @@ import { EventDialogComponent } from '../../components/event-dialog/event-dialog
           {{ calendarStore.upcomingEvents().length }} upcoming
         </p>
       </div>
-      <button mat-raised-button color="primary" class="flex items-center gap-2" (click)="openCreateDialog()">
-        <mat-icon>add</mat-icon>
-        New Event
-      </button>
+
+      <div class="flex items-center gap-3">
+        <mat-button-toggle-group [ngModel]="view()" (ngModelChange)="view.set($event)" appearance="legacy">
+          <mat-button-toggle value="list">
+            <mat-icon>view_list</mat-icon>
+            List
+          </mat-button-toggle>
+          <mat-button-toggle value="grid">
+            <mat-icon>calendar_month</mat-icon>
+            Grid
+          </mat-button-toggle>
+        </mat-button-toggle-group>
+
+        <button mat-raised-button color="primary" class="flex items-center gap-2" (click)="openCreateDialog()">
+          <mat-icon>add</mat-icon>
+          New Event
+        </button>
+      </div>
     </div>
 
-    @if (calendarStore.loading()) {
-      <div class="flex justify-center py-16">
-        <mat-spinner diameter="48"></mat-spinner>
-      </div>
-    } @else if (calendarStore.error()) {
-      <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
-        {{ calendarStore.error() }}
-      </div>
-    } @else if (calendarStore.events().length === 0) {
-      <div class="text-center py-16">
-        <mat-icon class="text-6xl text-gray-300 mb-4">event</mat-icon>
-        <h3 class="text-xl font-semibold text-gray-600">No events yet</h3>
-        <p class="text-gray-500 mt-2">Create your first event to get started</p>
-      </div>
+    @if (view() === 'grid') {
+      <app-calendar-grid />
     } @else {
-      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-        @for (event of calendarStore.events(); track event.id) {
-          <app-event-card [event]="event" (deleteClick)="deleteEvent($event)" />
-        }
-      </div>
+      @if (calendarStore.loading()) {
+        <div class="flex justify-center py-16">
+          <mat-spinner diameter="48"></mat-spinner>
+        </div>
+      } @else if (calendarStore.error()) {
+        <div class="bg-red-50 border border-red-200 rounded-lg p-4 text-red-700">
+          {{ calendarStore.error() }}
+        </div>
+      } @else if (calendarStore.events().length === 0) {
+        <div class="text-center py-16">
+          <mat-icon class="text-6xl text-gray-300 mb-4">event</mat-icon>
+          <h3 class="text-xl font-semibold text-gray-600">No events yet</h3>
+          <p class="text-gray-500 mt-2">Create your first event to get started</p>
+        </div>
+      } @else {
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          @for (event of calendarStore.events(); track event.id) {
+            <app-event-card [event]="event" (deleteClick)="deleteEvent($event)" />
+          }
+        </div>
+      }
     }
   `,
 })
 export class CalendarListComponent {
   protected calendarStore = inject(CalendarStore);
   private dialog = inject(MatDialog);
+
+  view = signal<CalendarView>('grid');
 
   ngOnInit() {
     this.calendarStore.loadEvents();

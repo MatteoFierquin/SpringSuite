@@ -1,7 +1,7 @@
 import { signalStore, withState, withMethods, withComputed, patchState } from '@ngrx/signals';
 import { inject, computed } from '@angular/core';
 import { CalendarService } from '../services/calendar.service';
-import { Event, EventRequest } from '../../models/event';
+import { Event, EventRequest, EventInvitee } from '../../models/event';
 
 interface CalendarState {
   events: Event[];
@@ -47,6 +47,15 @@ export const CalendarStore = signalStore(
 
     async updateEvent(id: number, event: EventRequest) {
       const updated = await calendarService.updateEvent(id, event).toPromise();
+      if (updated) {
+        patchState(store, {
+          events: store.events().map((e) => (e.id === id ? updated : e)),
+        });
+      }
+    },
+
+    async updateEventInvitees(id: number, invitees: EventInvitee[]) {
+      const updated = await calendarService.updateInvitees(id, invitees).toPromise();
       if (updated) {
         patchState(store, {
           events: store.events().map((e) => (e.id === id ? updated : e)),
