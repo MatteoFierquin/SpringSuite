@@ -38,7 +38,13 @@ public class Event {
     @ElementCollection
     @CollectionTable(name = "event_attendees", joinColumns = @JoinColumn(name = "event_id"))
     @Column(name = "attendee_username")
+    @Builder.Default
     private List<String> attendees = new ArrayList<>();
+
+    @ElementCollection
+    @CollectionTable(name = "event_invitees", joinColumns = @JoinColumn(name = "event_id"))
+    @Builder.Default
+    private List<EventInvitee> invitees = new ArrayList<>();
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

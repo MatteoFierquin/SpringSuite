@@ -12,5 +12,8 @@ public record EventResponse(
         LocalDateTime endTime,
         String owner,
         List<String> attendees,
+        List<InviteeResponse> invitees,
         LocalDateTime createdAt
-) {}
+) {
+    public record InviteeResponse(String email, String status) {}
+}

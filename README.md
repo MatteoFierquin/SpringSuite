@@ -2,6 +2,8 @@
 
 A collaborative suite with messaging, calendar, and docs applications built with Spring Boot microservices and Angular.
 
+/!\ For full disclosure AI was used in this project, mainly to write tests faster, readme and style.
+
 ## Architecture
 
 ```
@@ -25,12 +27,12 @@ A collaborative suite with messaging, calendar, and docs applications built with
 
 ## Projects
 
-| Service | Port | Description |
-|---------|------|-------------|
+| Service              | Port | Description                       |
+| -------------------- | ---- | --------------------------------- |
 | **service-registry** | 8761 | Eureka Server - Service discovery |
-| **api-gateway** | 8080 | API Gateway - Routing & Auth |
-| **auth-service** | 8081 | Authentication with JWT |
-| **calendar-service** | 8083 | Calendar & events (coming soon) |
+| **api-gateway**      | 8080 | API Gateway - Routing & Auth      |
+| **auth-service**     | 8081 | Authentication with JWT           |
+| **calendar-service** | 8083 | Calendar & events (coming soon)   |
 
 ## Quick Start
 
@@ -38,19 +40,21 @@ A collaborative suite with messaging, calendar, and docs applications built with
 
 ```bash
 # Start all services
-docker-compose up --build
+docker compose up --build
 
 ```
 
 ### Run Locally
 
 1. **Start Service Registry:**
+
    ```bash
    cd service-registry
    ./gradlew bootRun
    ```
 
 2. **Start Auth Service:**
+
    ```bash
    cd SpringAuth
    ./gradlew bootRun
@@ -58,17 +62,17 @@ docker-compose up --build
 
 3. **Access Eureka Dashboard:** http://localhost:8761
 
-
 ### Default Users
 
-| Username | Password | Role |
-|----------|----------|------|
-| admin | admin123 | ADMIN |
-| user | user123 | USER |
+| Username | Password | Role  |
+| -------- | -------- | ----- |
+| admin    | admin123 | ADMIN |
+| user     | user123  | USER  |
 
 ## Technology Stack
 
 ### Backend
+
 - Spring Boot 3.4
 - Spring Cloud (Eureka, Gateway)
 - Spring Security + JWT
@@ -76,6 +80,7 @@ docker-compose up --build
 - Docker
 
 ### Frontend
+
 - Angular
 - Angular Material / Tailwind CSS
 - RxJS
@@ -85,6 +90,7 @@ docker-compose up --build
 ### 1. Generate Project with Spring Initializr
 
 Add Dependencies:
+
 - Spring Web
 - Eureka Discovery Client
 - Spring Security
@@ -171,12 +177,11 @@ spring:
 
 ### 6. Service Port Reference
 
-| Service | Port |
-|---------|------|
-| auth-service | 8081 |
+| Service          | Port |
+| ---------------- | ---- |
+| auth-service     | 8081 |
 | calendar-service | 8083 |
-| <your-service> | 808x |
-
+| <your-service>   | 808x |
 
 ### 7. Run Your Service
 
@@ -186,4 +191,3 @@ cd <service-name>-service
 ```
 
 Verify it's registered in Eureka at http://localhost:8761
-

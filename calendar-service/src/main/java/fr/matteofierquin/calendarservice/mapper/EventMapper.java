@@ -5,6 +5,9 @@ import fr.matteofierquin.calendarservice.dto.EventResponse;
 import fr.matteofierquin.calendarservice.model.Event;
 import org.springframework.stereotype.Component;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
 @Component
 public class EventMapper {
 
@@ -21,6 +24,9 @@ public class EventMapper {
     }
 
     public EventResponse toResponse(Event event) {
+        List<EventResponse.InviteeResponse> invitees = event.getInvitees().stream()
+                .map(i -> new EventResponse.InviteeResponse(i.getEmail(), i.getStatus()))
+                .collect(Collectors.toList());
         return new EventResponse(
                 event.getId(),
                 event.getTitle(),
@@ -30,6 +36,7 @@ public class EventMapper {
                 event.getEndTime(),
                 event.getOwner(),
                 event.getAttendees(),
+                invitees,
                 event.getCreatedAt()
         );
     }

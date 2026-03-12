@@ -2,6 +2,9 @@ package fr.matteofierquin.calendarservice.controller;
 
 import fr.matteofierquin.calendarservice.dto.EventRequest;
 import fr.matteofierquin.calendarservice.dto.EventResponse;
+import fr.matteofierquin.calendarservice.dto.InviteeRequest;
+import fr.matteofierquin.calendarservice.dto.InviteeStatusRequest;
+import fr.matteofierquin.calendarservice.dto.InviteesUpdateRequest;
 import fr.matteofierquin.calendarservice.service.EventService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -68,5 +71,47 @@ public class EventController {
             @RequestHeader("X-User-Name") String username) {
         List<EventResponse> events = eventService.getEventsByDateRange(username, start, end);
         return ResponseEntity.ok(events);
+    }
+
+    @PostMapping("/{id}/invite")
+    public ResponseEntity<EventResponse> inviteUserToEvent(
+            @PathVariable Long id,
+            @RequestParam String inviteeUsername,
+            @RequestHeader("X-User-Name") String username) {
+        EventResponse updatedEvent = eventService.inviteUserToEvent(id, username, inviteeUsername);
+        return ResponseEntity.ok(updatedEvent);
+    }
+
+    @PostMapping("/{id}/invitees")
+    public ResponseEntity<EventResponse> addInvitee(
+            @PathVariable Long id,
+            @RequestBody InviteeRequest request,
+            @RequestHeader("X-User-Name") String username) {
+        return ResponseEntity.ok(eventService.addInvitee(id, username, request.email()));
+    }
+
+    @PutMapping("/{id}/invitees")
+    public ResponseEntity<EventResponse> updateInvitees(
+            @PathVariable Long id,
+            @RequestBody InviteesUpdateRequest request,
+            @RequestHeader("X-User-Name") String username) {
+        return ResponseEntity.ok(eventService.updateInvitees(id, username, request.invitees()));
+    }
+
+    @PatchMapping("/{id}/invitees/{email}")
+    public ResponseEntity<EventResponse> updateInviteeStatus(
+            @PathVariable Long id,
+            @PathVariable String email,
+            @RequestBody InviteeStatusRequest request,
+            @RequestHeader("X-User-Name") String username) {
+        return ResponseEntity.ok(eventService.updateInviteeStatus(id, username, email, request.status()));
+    }
+
+    @DeleteMapping("/{id}/invitees/{email}")
+    public ResponseEntity<EventResponse> removeInvitee(
+            @PathVariable Long id,
+            @PathVariable String email,
+            @RequestHeader("X-User-Name") String username) {
+        return ResponseEntity.ok(eventService.removeInvitee(id, username, email));
     }
 }
