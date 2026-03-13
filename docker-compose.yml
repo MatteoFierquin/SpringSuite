@@ -10,7 +10,11 @@ services:
     networks:
       - springsuite-network
     healthcheck:
-      test: ["CMD-SHELL", "wget -q --spider http://localhost:8761/actuator/health || exit 1"]
+      test:
+        [
+          "CMD-SHELL",
+          "wget -q --spider http://localhost:8761/actuator/health || exit 1",
+        ]
       interval: 15s
       timeout: 10s
       retries: 10
@@ -44,7 +48,7 @@ services:
     networks:
       - springsuite-network
 
-   chat-db:
+  chat-db:
     image: postgres:18-alpine
     container_name: chat-db
     environment:
