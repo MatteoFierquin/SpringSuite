@@ -181,6 +181,7 @@ spring:
 | ---------------- | ---- |
 | auth-service     | 8081 |
 | calendar-service | 8083 |
+| chat-service     | 8084 |
 | <your-service>   | 808x |
 
 ### 7. Run Your Service
