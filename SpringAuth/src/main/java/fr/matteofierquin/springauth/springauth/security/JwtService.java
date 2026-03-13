@@ -1,5 +1,6 @@
 package fr.matteofierquin.springauth.springauth.security;
 
+import fr.matteofierquin.springauth.springauth.model.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
@@ -28,8 +29,16 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public String extractUsername(String token) {
+    public String extractUserId(String token) {
         return extractClaim(token, Claims::getSubject);
+    }
+
+    public String extractUsername(String token) {
+        return extractClaim(token, claims -> claims.get("username", String.class));
+    }
+
+    public String extractEmail(String token) {
+        return extractClaim(token, claims -> claims.get("email", String.class));
     }
 
     public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
@@ -54,9 +63,13 @@ public class JwtService {
     }
 
     private String buildToken(Map<String, Object> extraClaims, UserDetails userDetails, long expiration) {
+        User user = (User) userDetails;
         return Jwts.builder()
                 .claims(extraClaims)
-                .subject(userDetails.getUsername())
+                .subject(user.getId())
+                .claim("username", user.getUsername())
+                .claim("email", user.getEmail())
+                .claim("role", user.getRole().name())
                 .issuedAt(new Date(System.currentTimeMillis()))
                 .expiration(new Date(System.currentTimeMillis() + expiration))
                 .signWith(getSigningKey())
@@ -64,8 +77,9 @@ public class JwtService {
     }
 
     public boolean isTokenValid(String token, UserDetails userDetails) {
-        final String username = extractUsername(token);
-        return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
+        final String userId = extractUserId(token);
+        User user = (User) userDetails;
+        return userId.equals(user.getId()) && !isTokenExpired(token);
     }
 
     private boolean isTokenExpired(String token) {

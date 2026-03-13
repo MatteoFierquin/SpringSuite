@@ -33,11 +33,11 @@ public class Event {
     private LocalDateTime endTime;
 
     @Column(nullable = false)
-    private String owner;  // Username of event creator
+    private String owner;  // User UUID of event creator
 
     @ElementCollection
     @CollectionTable(name = "event_attendees", joinColumns = @JoinColumn(name = "event_id"))
-    @Column(name = "attendee_username")
+    @Column(name = "attendee_user_id")
     @Builder.Default
     private List<String> attendees = new ArrayList<>();
 

@@ -11,14 +11,14 @@ import java.util.stream.Collectors;
 @Component
 public class EventMapper {
 
-    public Event toEntity(EventRequest request, String owner) {
+    public Event toEntity(EventRequest request, String ownerUserId) {
         return Event.builder()
                 .title(request.title())
                 .description(request.description())
                 .location(request.location())
                 .startTime(request.startTime())
                 .endTime(request.endTime())
-                .owner(owner)
+                .owner(ownerUserId)
                 .attendees(request.attendees() != null ? request.attendees() : new java.util.ArrayList<>())
                 .build();
     }

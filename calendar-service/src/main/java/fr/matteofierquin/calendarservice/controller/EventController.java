@@ -25,24 +25,24 @@ public class EventController {
 
     @GetMapping
     public ResponseEntity<List<EventResponse>> getUserEvents(
-            @RequestHeader("X-User-Name") String username) {
-        List<EventResponse> events = eventService.getUserEvents(username);
+            @RequestHeader("X-User-Id") String userId) {
+        List<EventResponse> events = eventService.getUserEvents(userId);
         return ResponseEntity.ok(events);
     }
 
     @GetMapping("/{id}")
     public ResponseEntity<EventResponse> getEvent(
             @PathVariable Long id,
-            @RequestHeader("X-User-Name") String username) {
-        EventResponse event = eventService.getEventById(id, username);
+            @RequestHeader("X-User-Id") String userId) {
+        EventResponse event = eventService.getEventById(id, userId);
         return ResponseEntity.ok(event);
     }
 
     @PostMapping
     public ResponseEntity<EventResponse> createEvent(
             @Valid @RequestBody EventRequest request,
-            @RequestHeader("X-User-Name") String username) {
-        EventResponse created = eventService.createEvent(request, username);
+            @RequestHeader("X-User-Id") String userId) {
+        EventResponse created = eventService.createEvent(request, userId);
         return ResponseEntity.status(HttpStatus.CREATED).body(created);
     }
 
@@ -50,16 +50,16 @@ public class EventController {
     public ResponseEntity<EventResponse> updateEvent(
             @PathVariable Long id,
             @Valid @RequestBody EventRequest request,
-            @RequestHeader("X-User-Name") String username) {
-        EventResponse updated = eventService.updateEvent(id, request, username);
+            @RequestHeader("X-User-Id") String userId) {
+        EventResponse updated = eventService.updateEvent(id, request, userId);
         return ResponseEntity.ok(updated);
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteEvent(
             @PathVariable Long id,
-            @RequestHeader("X-User-Name") String username) {
-        eventService.deleteEvent(id, username);
+            @RequestHeader("X-User-Id") String userId) {
+        eventService.deleteEvent(id, userId);
         return ResponseEntity.noContent().build();
     }
 
@@ -68,17 +68,17 @@ public class EventController {
     public ResponseEntity<List<EventResponse>> getEventsByDateRange(
             @RequestParam LocalDateTime start,
             @RequestParam LocalDateTime end,
-            @RequestHeader("X-User-Name") String username) {
-        List<EventResponse> events = eventService.getEventsByDateRange(username, start, end);
+            @RequestHeader("X-User-Id") String userId) {
+        List<EventResponse> events = eventService.getEventsByDateRange(userId, start, end);
         return ResponseEntity.ok(events);
     }
 
     @PostMapping("/{id}/invite")
     public ResponseEntity<EventResponse> inviteUserToEvent(
             @PathVariable Long id,
-            @RequestParam String inviteeUsername,
-            @RequestHeader("X-User-Name") String username) {
-        EventResponse updatedEvent = eventService.inviteUserToEvent(id, username, inviteeUsername);
+            @RequestParam String inviteeUserId,
+            @RequestHeader("X-User-Id") String userId) {
+        EventResponse updatedEvent = eventService.inviteUserToEvent(id, userId, inviteeUserId);
         return ResponseEntity.ok(updatedEvent);
     }
 
@@ -86,16 +86,16 @@ public class EventController {
     public ResponseEntity<EventResponse> addInvitee(
             @PathVariable Long id,
             @RequestBody InviteeRequest request,
-            @RequestHeader("X-User-Name") String username) {
-        return ResponseEntity.ok(eventService.addInvitee(id, username, request.email()));
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(eventService.addInvitee(id, userId, request.email()));
     }
 
     @PutMapping("/{id}/invitees")
     public ResponseEntity<EventResponse> updateInvitees(
             @PathVariable Long id,
             @RequestBody InviteesUpdateRequest request,
-            @RequestHeader("X-User-Name") String username) {
-        return ResponseEntity.ok(eventService.updateInvitees(id, username, request.invitees()));
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(eventService.updateInvitees(id, userId, request.invitees()));
     }
 
     @PatchMapping("/{id}/invitees/{email}")
@@ -103,15 +103,15 @@ public class EventController {
             @PathVariable Long id,
             @PathVariable String email,
             @RequestBody InviteeStatusRequest request,
-            @RequestHeader("X-User-Name") String username) {
-        return ResponseEntity.ok(eventService.updateInviteeStatus(id, username, email, request.status()));
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(eventService.updateInviteeStatus(id, userId, email, request.status()));
     }
 
     @DeleteMapping("/{id}/invitees/{email}")
     public ResponseEntity<EventResponse> removeInvitee(
             @PathVariable Long id,
             @PathVariable String email,
-            @RequestHeader("X-User-Name") String username) {
-        return ResponseEntity.ok(eventService.removeInvitee(id, username, email));
+            @RequestHeader("X-User-Id") String userId) {
+        return ResponseEntity.ok(eventService.removeInvitee(id, userId, email));
     }
 }

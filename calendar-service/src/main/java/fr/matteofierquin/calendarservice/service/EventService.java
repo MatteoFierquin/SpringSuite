@@ -24,39 +24,39 @@ public class EventService {
     private final EventRepository eventRepository;
     private final EventMapper eventMapper;
 
-    public EventResponse createEvent(EventRequest request, String username) {
-        Event event = eventMapper.toEntity(request, username);
+    public EventResponse createEvent(EventRequest request, String userId) {
+        Event event = eventMapper.toEntity(request, userId);
         Event saved = eventRepository.save(event);
         return eventMapper.toResponse(saved);
     }
 
     @Transactional(readOnly = true)
-    public List<EventResponse> getUserEvents(String username) {
-        List<Event> events = eventRepository.findByOwner(username);
+    public List<EventResponse> getUserEvents(String userId) {
+        List<Event> events = eventRepository.findByOwner(userId);
         return events.stream()
                 .map(eventMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
     @Transactional(readOnly = true)
-    public EventResponse getEventById(Long id, String username) {
+    public EventResponse getEventById(Long id, String userId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
         // only owner or attendee can view
-        if (!event.getOwner().equals(username) && !event.getAttendees().contains(username)) {
+        if (!event.getOwner().equals(userId) && !event.getAttendees().contains(userId)) {
             throw new IllegalArgumentException("You don't have access to this event");
         }
 
         return eventMapper.toResponse(event);
     }
 
-    public EventResponse updateEvent(Long id, EventRequest request, String username) {
+    public EventResponse updateEvent(Long id, EventRequest request, String userId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
         // only owner can update
-        if (!event.getOwner().equals(username)) {
+        if (!event.getOwner().equals(userId)) {
             throw new IllegalArgumentException("Only event owner can update");
         }
 
@@ -73,12 +73,12 @@ public class EventService {
         return eventMapper.toResponse(updated);
     }
 
-    public void deleteEvent(Long id, String username) {
+    public void deleteEvent(Long id, String userId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
         // only owner can delete
-        if (!event.getOwner().equals(username)) {
+        if (!event.getOwner().equals(userId)) {
             throw new IllegalArgumentException("Only event owner can delete");
         }
 
@@ -87,36 +87,36 @@ public class EventService {
 
     // Get events in date range
     @Transactional(readOnly = true)
-    public List<EventResponse> getEventsByDateRange(String username, LocalDateTime start, LocalDateTime end) {
-        List<Event> events = eventRepository.findByOwnerAndStartTimeBetween(username, start, end);
+    public List<EventResponse> getEventsByDateRange(String userId, LocalDateTime start, LocalDateTime end) {
+        List<Event> events = eventRepository.findByOwnerAndStartTimeBetween(userId, start, end);
         return events.stream()
                 .map(eventMapper::toResponse)
                 .collect(Collectors.toList());
     }
 
-    public EventResponse inviteUserToEvent(Long id, String username, String inviteeUsername) {
+    public EventResponse inviteUserToEvent(Long id, String userId, String inviteeUserId) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
         // only owner can invite
-        if (!event.getOwner().equals(username)) {
+        if (!event.getOwner().equals(userId)) {
             throw new IllegalArgumentException("Only event owner can invite");
         }
 
-        if (event.getAttendees().contains(inviteeUsername)) {
+        if (event.getAttendees().contains(inviteeUserId)) {
             throw new IllegalArgumentException("User is already an attendee");
         }
 
-        event.getAttendees().add(inviteeUsername);
+        event.getAttendees().add(inviteeUserId);
         Event updated = eventRepository.save(event);
         return eventMapper.toResponse(updated);
     }
 
-    public EventResponse addInvitee(Long id, String username, String email) {
+    public EventResponse addInvitee(Long id, String userId, String email) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
-        if (!event.getOwner().equals(username)) {
+        if (!event.getOwner().equals(userId)) {
             throw new IllegalArgumentException("Only event owner can manage invitees");
         }
 
@@ -130,11 +130,11 @@ public class EventService {
         return eventMapper.toResponse(eventRepository.save(event));
     }
 
-    public EventResponse updateInvitees(Long id, String username, java.util.List<InviteesUpdateRequest.InviteeItem> invitees) {
+    public EventResponse updateInvitees(Long id, String userId, java.util.List<InviteesUpdateRequest.InviteeItem> invitees) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
-        if (!event.getOwner().equals(username)) {
+        if (!event.getOwner().equals(userId)) {
             throw new IllegalArgumentException("Only event owner can manage invitees");
         }
 
@@ -150,7 +150,7 @@ public class EventService {
         return eventMapper.toResponse(eventRepository.save(event));
     }
 
-    public EventResponse updateInviteeStatus(Long id, String username, String email, String status) {
+    public EventResponse updateInviteeStatus(Long id, String userId, String email, String status) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
@@ -160,7 +160,7 @@ public class EventService {
                 .findFirst()
                 .orElseThrow(() -> new ResourceNotFoundException("Invitee not found: " + email));
 
-        if (!event.getOwner().equals(username) && !invitee.getEmail().equalsIgnoreCase(username)) {
+        if (!event.getOwner().equals(userId) && !invitee.getEmail().equalsIgnoreCase(userId)) {
             throw new IllegalArgumentException("Not authorized to update this invitee status");
         }
 
@@ -168,11 +168,11 @@ public class EventService {
         return eventMapper.toResponse(eventRepository.save(event));
     }
 
-    public EventResponse removeInvitee(Long id, String username, String email) {
+    public EventResponse removeInvitee(Long id, String userId, String email) {
         Event event = eventRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Event not found with id: " + id));
 
-        if (!event.getOwner().equals(username)) {
+        if (!event.getOwner().equals(userId)) {
             throw new IllegalArgumentException("Only event owner can remove invitees");
         }
 

@@ -62,14 +62,19 @@ public class AuthenticationFilter implements GlobalFilter, Ordered {
 
         // Extract user info from token and add to headers for downstream services
         Claims claims = extractClaims(token);
-        String username = claims.getSubject();
+        String userId = claims.getSubject();
+        String username = claims.get("username", String.class);
+        String email = claims.get("email", String.class);
+        String role = claims.get("role", String.class);
 
         ServerHttpRequest modifiedRequest = request.mutate()
+                .header("X-User-Id", userId)
                 .header("X-User-Name", username)
-                .header("X-User-Roles", claims.get("role", String.class))
+                .header("X-User-Email", email)
+                .header("X-User-Roles", role)
                 .build();
 
-        log.debug("Authenticated user: {} for path: {}", username, path);
+        log.debug("Authenticated user: {} ({}) for path: {}", username, userId, path);
 
         return chain.filter(exchange.mutate().request(modifiedRequest).build());
     }
